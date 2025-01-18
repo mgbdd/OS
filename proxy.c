@@ -145,14 +145,24 @@ void *handle_client(void *arg) {
         select(max_fd + 1, &readfds, NULL, NULL, NULL);
         bytes_read = 0;
 
+
+
         //обработка данных от клиента
         if (!client_closed && FD_ISSET(client_socket, &readfds)) 
         {
             bytes_read = recv(client_socket, buffer, BUFFER_SIZE, 0);
-            if (bytes_read <= 0)
+            if (bytes_read == 0)
             {
                 client_closed = 1;
-                printf("Client closed connection\n");
+                //printf("Client closed connection\n");
+                perror("Client closed connection\n");
+                continue; 
+            }
+            else if (bytes_read == -1)
+            {
+                client_closed = 1;
+                //printf("Error reading from client\n");
+                perror("Error reading from client\n");
                 continue; 
             }
 
@@ -176,10 +186,18 @@ void *handle_client(void *arg) {
         {
             bytes_read = 0;
             bytes_read = recv(target_socket, buffer, BUFFER_SIZE, 0);
-            if (bytes_read <= 0)
+            if (bytes_read == 0)
             { 
                 server_closed = 1;
-                printf("Server closed connection\n");
+                //printf("Server closed connection\n");
+                perror("Server closed connection\n");
+                continue; 
+            }
+            else if (bytes_read == -1)
+            { 
+                server_closed = 1;
+                //printf("Error reading from server\n");
+                perror("Error reading from server\n");
                 continue; 
             }
             bytes_sent = 0;
